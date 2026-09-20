@@ -327,28 +327,55 @@
   });
 
   function loadOptions() {
-    google.script.run
-      .withSuccessHandler(function(data){
-        fillSelect(document.getElementById('vehicle'),
-          data.vehicles.map(v => ({value: v, label: v})), '-- ជ្រើសរើស --');
 
-        fillSelect(document.getElementById('destination'),
-          data.destinations.map(d => ({value: d, label: d})), '-- ជ្រើសរើស --');
+  getFormOptions()
+    .then(function(data) {
 
-        ALL_STAFF = data.staff;
-        renderOfficerSelects();
+      fillSelect(
+        document.getElementById('vehicle'),
+        data.vehicles.map(v => ({
+          value: v,
+          label: v
+        })),
+        'ជ្រើសរើសយានយន្ត'
+      );
 
-        fillSelect(document.getElementById('driver'),
-          data.drivers.map(d => ({
-            value: d.name,
-            label: d.phone ? (d.name + ' (' + d.phone + ')') : d.name
-          })), '-- ជ្រើសរើស --');
-      })
-      .withFailureHandler(function(err){
-        document.getElementById('statusMsg').textContent = 'មិនអាចផ្ទុកទិន្នន័យបានទេ៖ ' + err.message;
-        document.getElementById('statusMsg').classList.add('err');
-      })
-      .getFormOptions();
+      fillSelect(
+        document.getElementById('destination'),
+        data.destinations.map(d => ({
+          value: d,
+          label: d
+        })),
+        'ជ្រើសរើសគោលដៅ'
+      );
+
+      ALL_STAFF = data.staff || [];
+
+      renderOfficerSelects();
+
+      fillSelect(
+        document.getElementById('driver'),
+        data.drivers.map(d => ({
+          value: d.name,
+          label: d.phone
+            ? (d.name + ' (' + d.phone + ')')
+            : d.name
+        })),
+        'ជ្រើសរើសអ្នកបើកបរ'
+      );
+
+    })
+    .catch(function(err) {
+
+      document.getElementById('statusMsg').textContent =
+        'មានបញ្ហាក្នុងការទាញទិន្នន័យ: ' + err.message;
+
+      document.getElementById('statusMsg')
+        .classList.add('err');
+
+    });
+
+}
   }
 
   const notes = document.getElementById('notes');
@@ -376,28 +403,35 @@
       driver: document.getElementById('driver').value,
       notes: document.getElementById('notes').value
     };
+submitDispatch(payload)
+  .then(function(result) {
 
-    google.script.run
-      .withSuccessHandler(function(){
-        statusMsg.textContent = 'សំណើរបស់អ្នកត្រូវបានបញ្ជូនដោយជោគជ័យ!';
-        statusMsg.classList.add('ok');
-        submitBtn.disabled = false;
-        submitLabel.textContent = 'បញ្ជូនសំណើនេះ';
-        form.reset();
-        charCount.textContent = '0';
-        loadOptions();
-      })
-      .withFailureHandler(function(err){
-        statusMsg.textContent = 'មានបញ្ហា៖ ' + err.message;
-        statusMsg.classList.add('err');
-        submitBtn.disabled = false;
-        submitLabel.textContent = 'បញ្ជូនសំណើនេះ';
-      })
-      .submitDispatch(payload);
+    statusMsg.textContent = 'បានបញ្ជូនសំណើដោយជោគជ័យ';
+    statusMsg.classList.add('ok');
+
+    submitBtn.disabled = false;
+    submitLabel.textContent = 'បញ្ជូនសំណើ';
+
+    form.reset();
+    charCount.textContent = '0';
+
+    loadOptions();
+
+  })
+  .catch(function(err) {
+
+    statusMsg.textContent =
+      'មានបញ្ហា: ' + err.message;
+
+    statusMsg.classList.add('err');
+
+    submitBtn.disabled = false;
+    submitLabel.textContent = 'បញ្ជូនសំណើ';
+
   });
 
   loadOptions();
 </script>
-
+<script src="api.js"></script>
 </body>
 </html>
