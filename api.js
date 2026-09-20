@@ -4,7 +4,7 @@
 // ============================================================
 
 const GAS_API_URL =
-  "PASTE_YOUR_GOOGLE_APPS_SCRIPT_EXEC_URL_HERE";
+  "https://script.google.com/macros/s/AKfycbxdG8M_KsH0J60Bq7qJ-wdcce6aqJzOTlznYuP3IMR8H8A73gFi0XtQdXtGFEZUwFjLYw/exec";
 
 
 // ============================================================
