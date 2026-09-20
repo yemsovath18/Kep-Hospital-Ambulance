@@ -163,39 +163,65 @@
     font-size:12.5px; color:var(--muted); letter-spacing:.3px; font-style:italic;
   }
 
-  @media (max-width:520px){
+ @media (max-width:520px){
+
+  body{
+    font-size:16px;
+    padding:0;
+    margin:0;
+  }
+
   .banner{
+    padding:14px 16px;
     flex-direction:column;
     align-items:flex-start;
   }
 
-  .banner-right{
-    text-align:left;
+  .brand{
+    width:100%;
+  }
+
+  .brand-text h1{
+    font-size:20px;
+  }
+
+  .brand-text p{
+    font-size:14px;
   }
 
   .wrap{
     width:100%;
-    max-width:100%;
+    max-width:none;
     margin:0;
-    padding:8px;
+    padding:12px 12px 30px;
     box-sizing:border-box;
   }
 
   .card{
     width:100%;
-    max-width:100%;
-    box-sizing:border-box;
-    padding:22px 14px 20px;
+    max-width:none;
     margin:0;
+    padding:22px 16px 26px;
     border-radius:16px;
+    box-sizing:border-box;
   }
 
   .card-head h2{
     font-size:20px;
+    line-height:1.5;
   }
 
   .card-sub{
-    font-size:13px;
+    font-size:14px;
+    line-height:1.6;
+  }
+
+  .field-row{
+    width:100%;
+  }
+
+  .field-body{
+    width:100%;
   }
 
   .field-body label{
@@ -203,11 +229,11 @@
   }
 
   select,
-  textarea{
+  textarea,
+  input{
+    width:100%;
+    box-sizing:border-box;
     font-size:16px;
-  }
-
-  select{
     min-height:48px;
   }
 
@@ -216,12 +242,14 @@
   }
 
   button{
-    min-height:50px;
-    font-size:16px;
+    width:100%;
+    min-height:52px;
+    font-size:17px;
   }
 
-  .icon-chip{
-    margin-top:20px;
+  .footer{
+    padding-left:12px;
+    padding-right:12px;
   }
 }
 </style>
