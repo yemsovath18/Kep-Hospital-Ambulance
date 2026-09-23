@@ -376,15 +376,10 @@
   <div class="tagline">ការថែទាំកាន់តែប្រសើរ សុខភាពកាន់តែល្អ<br>Better Care,Better Health</div>
   </div>
 
+<script src="api.js"></script>
 <script>
-  // The page is served inside a sandboxed googleusercontent.com iframe, so a
-  // relative link like "?page=report" resolves against THAT iframe's URL, not
-  // your real /exec URL — clicking it tries to load the sandbox URL directly,
-  // which doesn't work. Pointing it at the real deployment URL fixes that.
-  // If you ever create a brand-new deployment (not just "New version" on the
-  // existing one), update this constant to match the new /exec URL.
-  var DEPLOY_URL = 'https://script.google.com/macros/s/AKfycbxdG8M_KsH0J60Bq7qJ-wdcce6aqJzOTlznYuP3IMR8H8A73gFi0XtQdXtGFEZUwFjLYw/exec';
-  document.getElementById('navLink').href = 'https://yemsovath18.github.io/Kep-Hospital-Ambulance/?page=report';
+  // On GitHub Pages navLink already points to report.html via its href
+  // attribute in the HTML above, so no JS override is needed here.
 
   function fillSelect(sel, items, placeholder) {
     sel.innerHTML = '';
@@ -528,6 +523,5 @@
 
   loadOptions();
 </script>
-<script src="api.js"></script>
 </body>
 </html>
