@@ -260,11 +260,9 @@
   <div class="wrap">
     <div class="card">
       <div class="card-head">
-        <span class="emoji">📊</span>
         <h2 id="reportTitleMonth">របាយការណ៍ប្រចាំខែ <strong id="reportMonthNum">–</strong> ឆ្នាំ <strong id="reportYearNum">–</strong></h2>
         <div class="report-subtitle">សេវារថយន្តសង្គ្រោះ និង ដឹកជញ្ជូន</div>
       </div>
-      <p class="card-sub">ជ្រើសរើសខែសម្រាប់មើលរបាយការណ៍ (ទម្រង់ YYYY-MM) រួចបោះពុម្ពរបាយការណ៍។</p>
 
       <div class="control-row">
         <div class="control-group">
@@ -298,14 +296,20 @@
   // attribute in the HTML above, so no JS override is needed here.
 
   const SECTION_TITLES = {
-    destinations: '១. សរុបតាមទិសដៅរថយន្ត',
+    staff: '១. សរុបតាមមន្ត្រី/បុគ្គលិកទទួលបន្ទុក',
     drivers: '២. សរុបតាមអ្នកបើកបរ',
-    staff: '៣. សរុបតាមមន្ត្រី/បុគ្គលិកទទួលបន្ទុក',
+    destinations: '៣. សរុបតាមទិសដៅរថយន្ត',
     vehicles: '៤. សរុបតាមរថយន្ត'
   };
-  const SECTION_ORDER = ['destinations', 'drivers', 'staff', 'vehicles'];
+  const SECTION_ORDER = ['staff', 'drivers', 'destinations', 'vehicles'];
+  const SECTION_COLUMN_LABELS = {
+    staff: 'ឈ្មោះ',
+    drivers: 'ឈ្មោះ',
+    destinations: 'ទិសដៅរថយន្ត',
+    vehicles: 'ស្លាកលេខរថយន្ត'
+  };
 
-  function renderTable(sec) {
+  function renderTable(sec, columnLabel) {
     // លាក់ធាតុគ្មានដំណើរ (០ដង) ហើយរៀបតាមលំដាប់ពីច្រើនទៅតិច
     const rows = sec.rows
       .filter(r => r.count > 0)
@@ -314,7 +318,7 @@
     if (!rows.length) {
       return '<p class="empty-note">មិនទាន់មានទិន្នន័យសម្រាប់ខែនេះទេ</p>';
     }
-    let html = '<table><thead><tr><th>ឈ្មោះ</th><th class="num-col">ចំនួនដងធ្វើដំណើរ</th></tr></thead><tbody>';
+    let html = '<table><thead><tr><th>' + escapeHtml(columnLabel) + '</th><th class="num-col">ចំនួនដងធ្វើដំណើរ</th></tr></thead><tbody>';
     rows.forEach(r => {
       html += '<tr><td>' + escapeHtml(r.name) + '</td><td class="num-col">' + r.count + '</td></tr>';
     });
@@ -333,7 +337,7 @@
     document.getElementById('totalTrips').textContent = data.totalTrips;
     let html = '';
     SECTION_ORDER.forEach(key => {
-      html += '<div class="section"><h3>' + SECTION_TITLES[key] + '</h3>' + renderTable(data[key]) + '</div>';
+      html += '<div class="section"><h3>' + SECTION_TITLES[key] + '</h3>' + renderTable(data[key], SECTION_COLUMN_LABELS[key]) + '</div>';
     });
     document.getElementById('reportBody').innerHTML = html;
   }
