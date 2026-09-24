@@ -237,6 +237,8 @@
     tbody tr.total-row{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .section{ break-inside:avoid; }
     .status-msg{ display:none; }
+    .card-head .emoji{ display:none; }
+    .tagline{ display:none; }
   }
 </style>
 </head>
@@ -304,11 +306,16 @@
   const SECTION_ORDER = ['destinations', 'drivers', 'staff', 'vehicles'];
 
   function renderTable(sec) {
-    if (!sec.rows.length) {
+    // លាក់ធាតុគ្មានដំណើរ (០ដង) ហើយរៀបតាមលំដាប់ពីច្រើនទៅតិច
+    const rows = sec.rows
+      .filter(r => r.count > 0)
+      .sort((a, b) => b.count - a.count);
+
+    if (!rows.length) {
       return '<p class="empty-note">មិនទាន់មានទិន្នន័យសម្រាប់ខែនេះទេ</p>';
     }
     let html = '<table><thead><tr><th>ឈ្មោះ</th><th class="num-col">ចំនួនដងធ្វើដំណើរ</th></tr></thead><tbody>';
-    sec.rows.forEach(r => {
+    rows.forEach(r => {
       html += '<tr><td>' + escapeHtml(r.name) + '</td><td class="num-col">' + r.count + '</td></tr>';
     });
     html += '<tr class="total-row"><td>សរុប</td><td class="num-col">' + sec.total + '</td></tr>';
