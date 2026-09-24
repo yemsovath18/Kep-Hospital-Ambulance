@@ -98,10 +98,12 @@
     margin-top:26px;
     padding:34px 30px 30px;
   }
-  .card-head{ display:flex; align-items:center; gap:14px; margin-bottom:6px; }
+  .card-head{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px; margin-bottom:6px; }
   .card-head .emoji{ font-size:28px; line-height:1; }
-  .card-head h2{ margin:0; font-size:20px; font-weight:800; color:var(--red-600); letter-spacing:.2px; }
-  .card-sub{ margin:6px 0 24px; font-size:13.5px; color:var(--muted); font-weight:500; }
+  .card-head h2{ margin:0; font-size:20px; font-weight:600; color:var(--red-600); letter-spacing:.2px; }
+  .card-head h2 strong{ font-weight:800; }
+  .card-head .report-subtitle{ font-size:16px; font-weight:700; color:var(--blue-900); }
+  .card-sub{ margin:6px 0 24px; font-size:13.5px; color:var(--muted); font-weight:500; text-align:center; }
 
   .control-row{
     display:flex;
@@ -257,7 +259,8 @@
     <div class="card">
       <div class="card-head">
         <span class="emoji">📊</span>
-        <h2>របាយការណ៍ប្រចាំខែ — សេវារថយន្តសង្គ្រោះ និង ដឹកជញ្ជូន</h2>
+        <h2 id="reportTitleMonth">របាយការណ៍ប្រចាំខែ <strong id="reportMonthNum">–</strong> ឆ្នាំ <strong id="reportYearNum">–</strong></h2>
+        <div class="report-subtitle">សេវារថយន្តសង្គ្រោះ និង ដឹកជញ្ជូន</div>
       </div>
       <p class="card-sub">ជ្រើសរើសខែសម្រាប់មើលរបាយការណ៍ (ទម្រង់ YYYY-MM) រួចបោះពុម្ពរបាយការណ៍។</p>
 
@@ -328,9 +331,18 @@
     document.getElementById('reportBody').innerHTML = html;
   }
 
+  function updateReportTitle(monthYear) {
+    const parts = monthYear.split('-');
+    const y = parts[0];
+    const m = parseInt(parts[1], 10);
+    document.getElementById('reportMonthNum').textContent = m;
+    document.getElementById('reportYearNum').textContent = y;
+  }
+
   function loadReport() {
     const monthYear = document.getElementById('monthPicker').value;
     if (!monthYear) return;
+    updateReportTitle(monthYear);
     document.getElementById('reportBody').innerHTML = '<p class="empty-note">កំពុងផ្ទុកទិន្នន័យ...</p>';
     document.getElementById('totalTrips').textContent = '–';
     getReportData(monthYear)
