@@ -10,8 +10,9 @@ const GAS_API_URL =
 // (Apps Script Web App តែងតែយឺតជាង google.script.run ព្រោះត្រូវឆ្លងកាត់ HTTP
 // redirect ថ្មីរាល់ពេល ហើយពេលខ្លះក៏មាន "cold start" ផងដែរ)។
 const CACHE_TTL_MS = {
-  getFormOptions: 10 * 60 * 1000, // 10 នាទី — បញ្ជីរថយន្ត/អ្នកបើកបរ/មន្ត្រី/ទិសដៅ
-  getReportData: 3 * 60 * 1000    // 3 នាទី — របាយការណ៍ប្រចាំខែ
+  getFormOptions: 10 * 60 * 1000,  // 10 នាទី — បញ្ជីរថយន្ត/អ្នកបើកបរ/មន្ត្រី/ទិសដៅ
+  getReportData: 3 * 60 * 1000,    // 3 នាទី — របាយការណ៍ប្រចាំខែ
+  getDashboardData: 5 * 60 * 1000  // 5 នាទី — ផ្ទាំងគ្រប់គ្រង (all-time)
 };
 const CACHE_PREFIX = "kepHospitalCache_";
 
@@ -44,7 +45,10 @@ function writeCache_(key, value) {
 function clearReportCache_() {
   try {
     Object.keys(localStorage).forEach(function (k) {
-      if (k.indexOf(CACHE_PREFIX + "getReportData_") === 0) {
+      if (
+        k.indexOf(CACHE_PREFIX + "getReportData_") === 0 ||
+        k.indexOf(CACHE_PREFIX + "getDashboardData_") === 0
+      ) {
         localStorage.removeItem(k);
       }
     });
@@ -93,8 +97,8 @@ async function submitDispatch(data) {
     notes: data.notes || ""
   });
 
-  // សំណើថ្មីនេះនឹងផ្លាស់ប្តូរលេខសរុបក្នុងរបាយការណ៍ខែបច្ចុប្បន្ន —
-  // លុប cache របាយការណ៍ទាំងអស់ចោល ដើម្បីកុំឲ្យបង្ហាញលេខហួសសម័យ
+  // សំណើថ្មីនេះនឹងផ្លាស់ប្តូរលេខសរុបក្នុងរបាយការណ៍ខែបច្ចុប្បន្ន និង dashboard —
+  // លុប cache ទាំងអស់ចោល ដើម្បីកុំឲ្យបង្ហាញលេខហួសសម័យ
   clearReportCache_();
 
   return result;
@@ -106,6 +110,16 @@ async function getReportData(monthYear) {
   if (cached) return cached;
 
   const data = await apiRequest("getReportData", { monthYear: monthYear });
+  writeCache_(key, data);
+  return data;
+}
+
+async function getDashboardData() {
+  const key = cacheKey_("getDashboardData", {});
+  const cached = readCache_(key, CACHE_TTL_MS.getDashboardData);
+  if (cached) return cached;
+
+  const data = await apiRequest("getDashboardData");
   writeCache_(key, data);
   return data;
 }
