@@ -183,8 +183,9 @@
     text-align:left;
     padding:10px 14px;
     font-weight:700;
+    white-space:nowrap;
   }
-  thead th.num-col{ text-align:right; }
+  thead th.num-col{ text-align:right; width:1%; }
   tbody td{
     padding:9px 14px;
     border-bottom:1px solid var(--border);
@@ -223,6 +224,7 @@
     .control-row{ width:100%; }
     table{ font-size:12.5px; }
     thead th, tbody td{ padding:8px 10px; }
+    thead th.num-col{ font-size:11px; padding-left:6px; padding-right:6px; }
   }
   @media print{
     body{ background:#fff !important; padding-bottom:0; }
