@@ -487,10 +487,10 @@
     let html = '';
     SECTION_ORDER.forEach(key => {
       const sec = data[key];
-      const chartHtml = SECTION_CHART_TYPE[key] === 'pie' ? renderPie(sec) : renderChart(sec);
+      let chartHtml = SECTION_CHART_TYPE[key] === 'pie' ? renderPie(sec) : renderChart(sec);
+      if (!chartHtml) chartHtml = '<p class="empty-note">មិនទាន់មានទិន្នន័យសម្រាប់ខែនេះទេ</p>';
       html += '<div class="section"><h3>' + SECTION_TITLES[key] + '</h3>' +
         chartHtml +
-        renderTable(sec, SECTION_COLUMN_LABELS[key]) +
         '</div>';
     });
     document.getElementById('dashboardBody').innerHTML = html;
