@@ -75,6 +75,7 @@
   .brand-text p{ margin:2px 0 0; font-size:13px; font-weight:600; opacity:.92; }
   .brand-text small{ display:block; font-size:11.5px; font-weight:400; opacity:.8; margin-top:2px; }
   .banner-right{ text-align:right; font-size:12.5px; font-weight:600; line-height:1.5; opacity:.95; z-index:1; }
+  .nav-group{ display:flex; align-items:center; gap:10px; z-index:1; flex-wrap:wrap; justify-content:flex-end; }
   .nav-link{
     z-index:1;
     color:#fff;
@@ -187,6 +188,8 @@
     align-items:flex-start;
   }
 
+  .nav-group{ width:100%; justify-content:flex-start; }
+
   .brand{
     width:100%;
   }
@@ -282,7 +285,10 @@
         <small>សេវាបញ្ជូនប្រកបដោយគុណភាព</small>
       </div>
     </div>
-    <a class="nav-link" id="navLink" href="report.html">📊 មើលរបាយការណ៍ →</a>
+    <div class="nav-group">
+      <a class="nav-link" id="navLink" href="report.html">📊 មើលរបាយការណ៍ →</a>
+      <a class="nav-link" href="dashboard.html">ផ្ទាំងគ្រប់គ្រង</a>
+    </div>
   </div>
 
   <div class="wrap">
