@@ -269,7 +269,7 @@
   <div class="wrap">
     <div class="card">
       <div class="card-head">
-        <h2 id="reportTitleMonth">របាយការណ៍ប្រចាំខែ <strong id="reportMonthNum">–</strong> ឆ្នាំ <strong id="reportYearNum">–</strong></h2>
+        <h2 id="reportTitleMonth">របាយការណ៍ប្រចាំខែ <span id="reportMonthNum">–</span> ឆ្នាំ <strong id="reportYearNum">–</strong></h2>
         <div class="report-subtitle">សេវារថយន្តសង្គ្រោះ និង ដឹកជញ្ជូន</div>
       </div>
 
@@ -358,7 +358,7 @@
     const parts = monthYear.split('-');
     const y = parts[0];
     const m = parseInt(parts[1], 10);
-    document.getElementById('reportMonthNum').textContent = m;
+    document.getElementById('reportMonthNum').textContent = KHMER_MONTHS[m - 1] || m;
     document.getElementById('reportYearNum').textContent = y;
   }
 
