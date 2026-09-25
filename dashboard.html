@@ -358,7 +358,7 @@
   <div class="wrap">
     <div class="card">
       <div class="card-head">
-        <h2 id="dashTitleMonth">ផ្ទាំងគ្រប់គ្រងប្រចាំខែ <strong id="dashMonthNum">–</strong> ឆ្នាំ <strong id="dashYearNum">–</strong></h2>
+        <h2 id="dashTitleMonth">ផ្ទាំងគ្រប់គ្រងប្រចាំខែ <span id="dashMonthNum">–</span> ឆ្នាំ <strong id="dashYearNum">–</strong></h2>
         <div class="report-subtitle">មន្ត្រីទទួលបន្ទុក អ្នកបើកបរ ទិសដៅរថយន្ត និង រថយន្ត</div>
       </div>
 
@@ -506,7 +506,7 @@
     const parts = monthYear.split('-');
     const y = parts[0];
     const m = parseInt(parts[1], 10);
-    document.getElementById('dashMonthNum').textContent = m;
+    document.getElementById('dashMonthNum').textContent = KHMER_MONTHS[m - 1] || m;
     document.getElementById('dashYearNum').textContent = y;
   }
 
