@@ -75,6 +75,7 @@
   .logo-badge img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
   .brand-text h1{ margin:0; font-size:20px; font-weight:400; letter-spacing:.2px; font-family:'Khmer OS Muol Light','Moul',sans-serif; white-space:nowrap; }
   .brand-text p{ margin:2px 0 0; font-size:13px; font-weight:600; opacity:.92; }
+  .nav-group{ display:flex; align-items:center; gap:10px; z-index:1; flex-wrap:wrap; justify-content:flex-end; }
   .nav-link{
     z-index:1;
     color:#fff;
@@ -216,6 +217,7 @@
     .brand{ width:100%; }
     .brand-text h1{ font-size:20px; }
     .brand-text p{ font-size:14px; }
+    .nav-group{ width:100%; justify-content:flex-start; }
     .wrap{ width:100%; max-width:none; margin:0; padding:12px 10px 30px; box-sizing:border-box; }
     .card{ width:100%; max-width:none; margin:0; padding:20px 14px 24px; border-radius:16px; box-sizing:border-box; }
     .control-row{ width:100%; }
@@ -254,7 +256,10 @@
         <p>KEP PROVINCIAL HOSPITAL</p>
       </div>
     </div>
-     <a class="nav-link" id="navLink" href="index.html">← ត្រឡប់ទៅទម្រង់ស្នើសុំ</a>
+    <div class="nav-group">
+      <a class="nav-link" id="navLink" href="index.html">← ត្រឡប់ទៅទម្រង់ស្នើសុំ</a>
+      <a class="nav-link" href="dashboard.html">ផ្ទាំងគ្រប់គ្រង</a>
+    </div>
   </div>
 
   <div class="wrap">
