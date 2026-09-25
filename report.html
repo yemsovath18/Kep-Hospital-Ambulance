@@ -118,7 +118,8 @@
   .control-group label{
     display:block; font-size:13px; font-weight:700; margin-bottom:8px; color:var(--ink);
   }
-  input[type="month"]{
+  .month-year-row{ display:flex; gap:8px; }
+  .km-select{
     background:var(--field-bg);
     border:1.5px solid var(--border);
     border-radius:12px;
@@ -126,8 +127,9 @@
     font-family:inherit;
     font-size:14.5px;
     color:var(--ink);
+    cursor:pointer;
   }
-  input[type="month"]:focus{
+  .km-select:focus{
     outline:none; border-color:var(--blue-500); background:#fff;
     box-shadow:0 0 0 4px rgba(45,125,210,0.15);
   }
@@ -273,8 +275,11 @@
 
       <div class="control-row">
         <div class="control-group">
-          <label for="monthPicker">ជ្រើសរើសខែសម្រាប់មើលរបាយការណ៍</label>
-          <input type="month" id="monthPicker" min="2026-01">
+          <label for="monthSelect">ជ្រើសរើសខែសម្រាប់មើលរបាយការណ៍</label>
+          <div class="month-year-row">
+            <select id="monthSelect" class="km-select"></select>
+            <select id="yearSelect" class="km-select"></select>
+          </div>
         </div>
         <button class="download-btn" id="printBtn" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -357,8 +362,42 @@
     document.getElementById('reportYearNum').textContent = y;
   }
 
+  const KHMER_MONTHS = [
+    'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
+    'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
+  ];
+
+  function getSelectedMonthYear() {
+    const m = document.getElementById('monthSelect').value;
+    const y = document.getElementById('yearSelect').value;
+    if (!m || !y) return '';
+    return y + '-' + m;
+  }
+
+  function initMonthYearSelectors() {
+    const monthSelect = document.getElementById('monthSelect');
+    const yearSelect = document.getElementById('yearSelect');
+    monthSelect.innerHTML = KHMER_MONTHS.map(function(name, i){
+      const val = String(i + 1).padStart(2, '0');
+      return '<option value="' + val + '">' + name + '</option>';
+    }).join('');
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const startYear = 2026;
+    const endYear = Math.max(currentYear + 1, startYear);
+    let yearOptions = '';
+    for (let y = startYear; y <= endYear; y++) {
+      yearOptions += '<option value="' + y + '">' + y + '</option>';
+    }
+    yearSelect.innerHTML = yearOptions;
+
+    monthSelect.value = String(now.getMonth() + 1).padStart(2, '0');
+    yearSelect.value = String(currentYear);
+  }
+
   function loadReport() {
-    const monthYear = document.getElementById('monthPicker').value;
+    const monthYear = getSelectedMonthYear();
     if (!monthYear) return;
     updateReportTitle(monthYear);
     document.getElementById('reportBody').innerHTML = '<p class="empty-note">កំពុងផ្ទុកទិន្នន័យ...</p>';
@@ -371,7 +410,8 @@
       });
   }
 
-  document.getElementById('monthPicker').addEventListener('change', loadReport);
+  document.getElementById('monthSelect').addEventListener('change', loadReport);
+  document.getElementById('yearSelect').addEventListener('change', loadReport);
 
   const printBtn = document.getElementById('printBtn');
   printBtn.addEventListener('click', function(){
@@ -379,12 +419,8 @@
   });
 
   // Default to the current month on load.
-  (function initMonth(){
-    const now = new Date();
-    const val = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-    document.getElementById('monthPicker').value = val;
-    loadReport();
-  })();
+  initMonthYearSelectors();
+  loadReport();
 
   // ធ្វើឲ្យទទឹងអក្សរ "មន្ទីរពេទ្យខេត្តកែប" (ខាងលើ) ស្មើនឹងទទឹងពាក្យ
   // "KEP PROVINCIAL HOSPITAL" (ខាងក្រោម) ដោយកែទំហំពុម្ពអក្សរដោយស្វ័យប្រវត្តិ
