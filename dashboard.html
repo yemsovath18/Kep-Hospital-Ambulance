@@ -212,6 +212,50 @@
     text-align:left;
   }
 
+  .pie-wrap{
+    display:flex;
+    align-items:center;
+    gap:24px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .pie-chart{
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    flex-shrink:0;
+    box-shadow:0 0 0 1px var(--border) inset;
+  }
+  .pie-legend{
+    flex:1;
+    min-width:180px;
+  }
+  .pie-legend-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12.5px;
+    margin-bottom:7px;
+  }
+  .pie-dot{
+    width:11px;
+    height:11px;
+    border-radius:3px;
+    flex-shrink:0;
+  }
+  .pie-name{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .pie-pct{
+    margin-left:auto;
+    font-weight:800;
+    color:var(--blue-900);
+    flex-shrink:0;
+    padding-left:8px;
+  }
+
   table{
     width:100%;
     border-collapse:collapse;
@@ -266,6 +310,7 @@
     table{ font-size:12.5px; }
     thead th, tbody td{ padding:8px 10px; }
     .bar-label{ width:96px; font-size:12px; }
+    .pie-chart{ width:120px; height:120px; }
   }
   @media print{
     body{ background:#fff !important; padding-bottom:0; }
@@ -284,6 +329,7 @@
     .status-msg{ display:none; }
     .card-head .emoji{ display:none; }
     .chart-wrap{ display:none; }
+    .pie-wrap{ display:none; }
     .tagline{ display:none; }
   }
 </style>
@@ -310,7 +356,7 @@
     <div class="card">
       <div class="card-head">
         <h2 id="dashTitleMonth">ផ្ទាំងគ្រប់គ្រងប្រចាំខែ <strong id="dashMonthNum">–</strong> ឆ្នាំ <strong id="dashYearNum">–</strong></h2>
-        <div class="report-subtitle">អ្នកបើកបរ និង មន្ត្រីទទួលបន្ទុក</div>
+        <div class="report-subtitle">មន្ត្រីទទួលបន្ទុក អ្នកបើកបរ ទិសដៅរថយន្ត និង រថយន្ត</div>
       </div>
 
       <div class="control-row">
@@ -343,14 +389,25 @@
 <script>
 
   const SECTION_TITLES = {
-    drivers: '១. សរុបតាមអ្នកបើកបរ',
-    staff: '២. សរុបតាមមន្ត្រី/បុគ្គលិកទទួលបន្ទុក'
+    staff: '១. សរុបតាមមន្ត្រី/បុគ្គលិកទទួលបន្ទុក',
+    drivers: '២. សរុបតាមអ្នកបើកបរ',
+    destinations: '៣. សរុបតាមទិសដៅរថយន្ត',
+    vehicles: '៤. សរុបតាមរថយន្ត'
   };
-  const SECTION_ORDER = ['drivers', 'staff'];
+  const SECTION_ORDER = ['staff', 'drivers', 'destinations', 'vehicles'];
   const SECTION_COLUMN_LABELS = {
+    staff: 'ឈ្មោះ',
     drivers: 'ឈ្មោះ',
-    staff: 'ឈ្មោះ'
+    destinations: 'ទិសដៅរថយន្ត',
+    vehicles: 'ស្លាកលេខរថយន្ត'
   };
+  const SECTION_CHART_TYPE = {
+    staff: 'bar',
+    drivers: 'bar',
+    destinations: 'pie',
+    vehicles: 'pie'
+  };
+  const PIE_COLORS = ['#1a5aa8', '#2d7dd2', '#e0293e', '#f2994a', '#1a8f4c', '#8e44ad', '#16a2b8', '#e91e8c', '#9b9b3a', '#546e7a'];
 
   function escapeHtml(s) {
     const div = document.createElement('div');
@@ -379,6 +436,34 @@
     return html;
   }
 
+  function renderPie(sec) {
+    const rows = sec.rows
+      .filter(r => r.count > 0)
+      .sort((a, b) => b.count - a.count);
+
+    if (!rows.length) return '';
+
+    const total = rows.reduce((s, r) => s + r.count, 0);
+    let cum = 0;
+    const stops = [];
+    let legend = '';
+    rows.forEach((r, i) => {
+      const pct = total ? (r.count / total * 100) : 0;
+      const color = PIE_COLORS[i % PIE_COLORS.length];
+      const start = cum;
+      cum += pct;
+      stops.push(color + ' ' + start.toFixed(2) + '% ' + cum.toFixed(2) + '%');
+      legend += '<div class="pie-legend-item">' +
+        '<span class="pie-dot" style="background:' + color + '"></span>' +
+        '<span class="pie-name" title="' + escapeHtml(r.name) + '">' + escapeHtml(r.name) + '</span>' +
+        '<span class="pie-pct">' + Math.round(pct) + '%</span>' +
+        '</div>';
+    });
+    const gradient = 'conic-gradient(' + stops.join(', ') + ')';
+    return '<div class="pie-wrap"><div class="pie-chart" style="background:' + gradient + '"></div>' +
+      '<div class="pie-legend">' + legend + '</div></div>';
+  }
+
   function renderTable(sec, columnLabel) {
     // លាក់ធាតុគ្មានដំណើរ (០ដង) ហើយរៀបតាមលំដាប់ពីច្រើនទៅតិច
     const rows = sec.rows
@@ -402,8 +487,9 @@
     let html = '';
     SECTION_ORDER.forEach(key => {
       const sec = data[key];
+      const chartHtml = SECTION_CHART_TYPE[key] === 'pie' ? renderPie(sec) : renderChart(sec);
       html += '<div class="section"><h3>' + SECTION_TITLES[key] + '</h3>' +
-        renderChart(sec) +
+        chartHtml +
         renderTable(sec, SECTION_COLUMN_LABELS[key]) +
         '</div>';
     });
