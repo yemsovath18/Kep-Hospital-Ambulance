@@ -151,3 +151,27 @@ async function adminAddItem(password, category, name, phone) {
   clearFormOptionsCache_();
   return data;
 }
+
+async function adminUpdateItem(password, category, oldName, name, phone) {
+  const data = await apiRequest("adminUpdateItem", {
+    password: password,
+    category: category,
+    oldName: oldName,
+    name: name,
+    phone: phone || ""
+  });
+  clearFormOptionsCache_();
+  clearReportCache_();
+  return data;
+}
+
+async function adminDeleteItem(password, category, name) {
+  const data = await apiRequest("adminDeleteItem", {
+    password: password,
+    category: category,
+    name: name
+  });
+  clearFormOptionsCache_();
+  clearReportCache_();
+  return data;
+}
