@@ -604,6 +604,33 @@
   let current = 'vehicles';
   let lastAdded = '';
 
+  // ---------- រក្សាសម្គាល់ចូល (Admin) ----------
+  // ប្រើ localStorage + ពេលផុតកំណត់ ៣០ នាទីតាមសកម្មភាព ដើម្បីឲ្យអាចទៅមើល dashboard
+  // (tab ឬទំព័រផ្សេង) រួចត្រឡប់មកវិញដោយមិនបាច់ចូលម្តងទៀត។ ចុច "ចាកចេញ" ដើម្បីលុបភ្លាមៗ។
+  const AUTH_KEY = 'kepAdminAuth';
+  const AUTH_TTL_MS = 30 * 60 * 1000;
+  function saveAuth(pw) {
+    try { localStorage.setItem(AUTH_KEY, JSON.stringify({ pw: pw, t: Date.now() })); } catch (e) {}
+  }
+  function loadAuth() {
+    try {
+      const raw = localStorage.getItem(AUTH_KEY);
+      if (!raw) return '';
+      const o = JSON.parse(raw);
+      if (!o || typeof o.pw !== 'string' || typeof o.t !== 'number' || Date.now() - o.t > AUTH_TTL_MS) {
+        localStorage.removeItem(AUTH_KEY);
+        return '';
+      }
+      return o.pw;
+    } catch (e) { return ''; }
+  }
+  function clearAuth() { try { localStorage.removeItem(AUTH_KEY); } catch (e) {} }
+  let lastTouch = 0;
+  document.addEventListener('click', function () {
+    // ពន្យាពេលផុតកំណត់ ពេលមានសកម្មភាព (កំណត់មិនឲ្យសរសេរញឹកពេក)
+    if (password && Date.now() - lastTouch > 15000) { lastTouch = Date.now(); saveAuth(password); }
+  });
+
   function $(id) { return document.getElementById(id); }
   function escapeHtml(s) {
     const div = document.createElement('div');
@@ -735,7 +762,7 @@
     setMenuOpen(false);
     password = '';
     options = null;
-    try { sessionStorage.removeItem('kepAdminPw'); } catch (e) {}
+    clearAuth();
     $('adminView').classList.add('hidden');
     $('loginView').classList.remove('hidden');
     $('pwInput').value = '';
@@ -749,7 +776,7 @@
     return apiGetOptions(pw).then(function (data) {
       password = pw;
       options = data;
-      try { sessionStorage.setItem('kepAdminPw', pw); } catch (e) {}
+      saveAuth(pw);
       btn.disabled = false;
       showAdmin();
     }).catch(function (err) {
@@ -897,7 +924,7 @@
     setMsg(st, 'កំពុងរក្សាទុក...', '');
     apiChangePassword(cur, n1).then(function () {
       password = n1;
-      try { sessionStorage.setItem('kepAdminPw', n1); } catch (err) {}
+      saveAuth(n1);
       $('pwForm').reset();
       btn.disabled = false;
       setMsg(st, '✓ បានប្តូរពាក្យសម្ងាត់រួចរាល់ — សូមប្រើពាក្យសម្ងាត់ថ្មីនៅពេលចូលលើកក្រោយ', 'ok');
@@ -1293,8 +1320,7 @@
 
   // ចូលដោយស្វ័យប្រវត្តិ ប្រសិនបើបានចូលរួចហើយក្នុង tab នេះ
   (function autoLogin() {
-    let saved = '';
-    try { saved = sessionStorage.getItem('kepAdminPw') || ''; } catch (e) {}
+    const saved = loadAuth();
     if (saved) login(saved, true);
   })();
 
