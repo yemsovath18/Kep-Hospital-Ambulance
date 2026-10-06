@@ -200,3 +200,25 @@ async function adminSendReportPdf(password, monthYear, pdfBase64, caption) {
   }
   return result.data;
 }
+
+// ប្តូរពាក្យសម្ងាត់ Admin — ប្រើ POST ដើម្បីកុំឲ្យពាក្យសម្ងាត់ទៅដាក់ក្នុង URL
+async function adminChangePassword(password, newPassword) {
+  const response = await fetch(GAS_API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      action: "adminChangePassword",
+      password: password,
+      newPassword: newPassword
+    }),
+    cache: "no-store"
+  });
+  if (!response.ok) {
+    throw new Error("API Error: " + response.status + " " + response.statusText);
+  }
+  const result = await response.json();
+  if (result && result.ok === false) {
+    throw new Error(result.error || "API request failed");
+  }
+  return result.data;
+}
