@@ -101,7 +101,7 @@
   }
   .card-head{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px; margin-bottom:6px; }
   .card-head .emoji{ font-size:28px; line-height:1; }
-  .card-head h2{ margin:0; font-size:20px; font-weight:400; color:var(--red-600); letter-spacing:.2px; font-family:'Khmer OS Muol Light','Moul',sans-serif; }
+  .card-head h2{ margin:0; font-size:20px; font-weight:400; color:var(--red-600); letter-spacing:.2px; font-family:'Khmer OS Muol Light','Moul',sans-serif;  white-space:nowrap; }
   .card-head h2 strong{ font-weight:800; }
   .card-head .report-subtitle{ font-size:16px; font-weight:700; color:var(--blue-900); }
   .card-sub{ margin:6px 0 24px; font-size:13.5px; color:var(--muted); font-weight:500; text-align:center; }
@@ -268,24 +268,54 @@
   .btn-full{ width:100%; justify-content:center; }
   .hidden{ display:none !important; }
 
-  .tabs{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:22px; }
-  .tab{
-    flex:1 1 0; min-width:120px;
+  /* ===== Menu (open menu) ===== */
+  .menu-wrap{ position:relative; margin-bottom:22px; }
+  .menu-btn{
+    width:100%;
+    display:flex; align-items:center; gap:12px;
     background:var(--field-bg);
     border:1.5px solid var(--border);
-    border-radius:12px;
-    padding:11px 10px;
-    font-family:inherit; font-size:14px; font-weight:700;
-    color:var(--muted);
-    cursor:pointer;
-    transition:all .12s;
-  }
-  .tab .cnt{ font-weight:600; opacity:.8; margin-left:4px; }
-  .tab.active{
-    background:var(--blue-100);
-    border-color:var(--blue-500);
+    border-radius:14px;
+    padding:12px 16px;
+    font-family:inherit; font-size:15px; font-weight:700;
     color:var(--blue-900);
+    cursor:pointer;
+    text-align:left;
+    transition:border-color .12s, box-shadow .12s, background .12s;
   }
+  .menu-btn:hover{ border-color:var(--blue-500); }
+  .menu-btn[aria-expanded="true"]{
+    background:#fff; border-color:var(--blue-500);
+    box-shadow:0 0 0 4px rgba(45,125,210,0.15);
+  }
+  .menu-btn svg{ width:20px; height:20px; flex-shrink:0; }
+  .menu-btn .menu-current{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .menu-btn .chev{ width:18px; height:18px; color:var(--muted); transition:transform .15s; }
+  .menu-btn[aria-expanded="true"] .chev{ transform:rotate(180deg); }
+  .menu-panel{
+    position:absolute; left:0; right:0; top:calc(100% + 8px); z-index:20;
+    background:#fff;
+    border:1.5px solid var(--border);
+    border-radius:14px;
+    box-shadow:0 18px 40px -12px rgba(15,60,120,0.35);
+    padding:6px;
+    display:flex; flex-direction:column; gap:2px;
+  }
+  .menu-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    width:100%;
+    background:none; border:none; border-radius:10px;
+    padding:12px 14px;
+    font-family:inherit; font-size:14.5px; font-weight:600;
+    color:var(--ink); text-align:left; cursor:pointer;
+  }
+  .menu-item:hover{ background:var(--field-bg); }
+  .menu-item.active{ background:var(--blue-100); color:var(--blue-900); font-weight:800; }
+  .menu-item .cnt{ font-weight:700; color:var(--muted); font-size:13px; }
+  .menu-sep{ height:1px; background:var(--border); margin:4px 8px; }
+  a.menu-item{ text-decoration:none; }
+  .menu-item .ext{ width:15px; height:15px; color:var(--muted); flex-shrink:0; }
+  .field label .opt{ font-weight:500; color:var(--muted); font-size:12px; }
 
   .add-form{
     background:var(--blue-100);
@@ -311,7 +341,6 @@
     text-decoration:underline; cursor:pointer; padding:0;
   }
   @media (max-width:768px){
-    .tab{ min-width:calc(50% - 4px); }
     .add-form{ padding:16px 14px 4px; }
   }
   .admin-table{ table-layout:auto; }
@@ -362,8 +391,6 @@
     .admin-table.row-active tr:not(.editing):not(.confirming) td:nth-child(2){ flex:1; }
     .admin-table td:nth-child(1), .admin-table th:nth-child(1){ padding-left:6px; padding-right:2px; }
   }
-  .tab.report-tab{ flex-basis:100%; background:#fff; border-style:dashed; color:var(--blue-700); }
-  .tab.report-tab.active{ background:var(--blue-100); border-style:solid; color:var(--blue-900); }
   #reportView .control-row{ margin-bottom:14px; padding-bottom:18px; }
   .send-confirm{
     display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
@@ -372,13 +399,13 @@
   }
   #reportView .section{ margin-bottom:22px; }
   @media print{ .act-col{ display:none; } }
-  @media print{ .login-box, .tabs, .add-form{ display:none; } }
+  @media print{ .login-box, .menu-wrap, .add-form, #pwView{ display:none; } }
 
   /* ===== បោះពុម្ពរបាយការណ៍ពីទំព័រ Admin ===== */
   .rpt-print-head{ display:none; }
   @media print{
     body.rpt-active .card-head,
-    body.rpt-active .tabs,
+    body.rpt-active .menu-wrap,
     body.rpt-active .send-confirm,
     body.rpt-active .status-msg,
     body.rpt-active .logout,
@@ -414,16 +441,13 @@
         <p>KEP PROVINCIAL HOSPITAL</p>
       </div>
     </div>
-    <div class="nav-group">
-      <a class="nav-link" id="navLink" href="index.html">← ត្រឡប់ទៅទម្រង់ស្នើសុំ</a>
-    </div>
+    
   </div>
 
   <div class="wrap">
     <div class="card">
       <div class="card-head">
         <h2>ទំព័រអ្នកគ្រប់គ្រង (Admin)</h2>
-        <div class="report-subtitle">គ្រប់គ្រងបញ្ជីរថយន្ត អ្នកបើកបរ មន្ត្រី និងទិសដៅ</div>
       </div>
 
       <!-- Login -->
@@ -440,7 +464,14 @@
 
       <!-- Admin panel -->
       <div id="adminView" class="hidden">
-        <div class="tabs" id="tabs"></div>
+        <div class="menu-wrap" id="menuWrap">
+          <button type="button" class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="tabs">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            <span class="menu-current" id="menuCurrent">ម៉ឺនុយ</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="menu-panel hidden" id="tabs" role="menu"></div>
+        </div>
 
         <div id="catView">
         <form class="add-form" id="addForm" autocomplete="off">
@@ -469,6 +500,31 @@
         </div>
         <div id="listBody"><p class="empty-note">កំពុងផ្ទុកទិន្នន័យ...</p></div>
 
+        </div>
+
+        <div id="pwView" class="hidden">
+          <form class="add-form" id="pwForm" autocomplete="off">
+            <h3>ប្តូរពាក្យសម្ងាត់</h3>
+            <div class="field">
+              <label for="curPw">ពាក្យសម្ងាត់បច្ចុប្បន្ន</label>
+              <input type="password" id="curPw" autocomplete="current-password" required>
+            </div>
+            <div class="field">
+              <label for="newPw">ពាក្យសម្ងាត់ថ្មី <span class="opt">(យ៉ាងតិច ៦ តួអក្សរ)</span></label>
+              <input type="password" id="newPw" autocomplete="new-password" minlength="6" maxlength="64" required>
+            </div>
+            <div class="field">
+              <label for="newPw2">បញ្ជាក់ពាក្យសម្ងាត់ថ្មី</label>
+              <input type="password" id="newPw2" autocomplete="new-password" minlength="6" maxlength="64" required>
+            </div>
+            <div class="field">
+              <button class="download-btn" id="pwBtn" type="submit">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                ប្តូរពាក្យសម្ងាត់
+              </button>
+            </div>
+          </form>
+          <div class="status-msg" id="pwStatus"></div>
         </div>
 
         <div id="reportView" class="hidden">
@@ -532,6 +588,9 @@
 
   function apiGetReport(monthYear) { return getReportData(monthYear); }
   function apiSendReportPdf(pw, monthYear, pdfBase64, caption) { return adminSendReportPdf(pw, monthYear, pdfBase64, caption); }
+  function apiChangePassword(pw, newPw) { return adminChangePassword(pw, newPw); }
+  const DASHBOARD_URL = 'dashboard.html';
+  const DASHBOARD_NEW_TAB = false;
 
   const CATEGORIES = [
     { key: 'vehicles',     tab: 'រថយន្ត',          single: 'រថយន្ត',          nameLabel: 'ស្លាកលេខរថយន្ត',          list: 'បញ្ជីរថយន្ត' },
@@ -562,13 +621,31 @@
     return list.map(function (it) { return typeof it === 'string' ? { name: it, phone: '' } : it; });
   }
 
+  const EXT_ICON = '<svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+  const VIEW_LABELS = { report: 'របាយការណ៍ប្រចាំខែ', password: 'ប្តូរពាក្យសម្ងាត់' };
+
   function renderTabs() {
+    function item(key, label) {
+      return '<button type="button" role="menuitem" class="menu-item' + (current === key ? ' active' : '') + '" data-key="' + key + '"><span>' + label + '</span></button>';
+    }
     $('tabs').innerHTML = CATEGORIES.map(function (c) {
-      return '<button type="button" class="tab' + (c.key === current ? ' active' : '') + '" data-key="' + c.key + '">' +
-        escapeHtml(c.tab) + '<span class="cnt">(' + getItems(c.key).length + ')</span></button>';
+      return '<button type="button" role="menuitem" class="menu-item' + (c.key === current ? ' active' : '') + '" data-key="' + c.key + '">' +
+        '<span>' + escapeHtml(c.tab) + '</span><span class="cnt">' + getItems(c.key).length + '</span></button>';
     }).join('') +
-      '<button type="button" class="tab report-tab' + (current === 'report' ? ' active' : '') + '" data-key="report">របាយការណ៍ប្រចាំខែ</button>';
+      '<div class="menu-sep"></div>' +
+      item('report', VIEW_LABELS.report) +
+      '<a role="menuitem" class="menu-item" href="' + DASHBOARD_URL + '"' + (DASHBOARD_NEW_TAB ? ' target="_blank" rel="noopener"' : '') + '><span>ផ្ទាំងគ្រប់គ្រង</span>' + (DASHBOARD_NEW_TAB ? EXT_ICON : '') + '</a>' +
+      '<div class="menu-sep"></div>' +
+      item('password', VIEW_LABELS.password);
+    const cur = CATEGORIES.find(function (c) { return c.key === current; });
+    $('menuCurrent').textContent = cur ? cur.tab : (VIEW_LABELS[current] || 'ម៉ឺនុយ');
   }
+
+  function setMenuOpen(open) {
+    $('tabs').classList.toggle('hidden', !open);
+    $('menuBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  function isMenuOpen() { return !$('tabs').classList.contains('hidden'); }
 
   const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
   const ICON_DEL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
@@ -640,10 +717,12 @@
   function renderAll() {
     renderTabs();
     const isReport = current === 'report';
-    $('catView').classList.toggle('hidden', isReport);
+    const isPw = current === 'password';
+    $('catView').classList.toggle('hidden', isReport || isPw);
     $('reportView').classList.toggle('hidden', !isReport);
+    $('pwView').classList.toggle('hidden', !isPw);
     document.body.classList.toggle('rpt-active', isReport);
-    if (!isReport) { renderForm(); renderList(); }
+    if (!isReport && !isPw) { renderForm(); renderList(); }
   }
 
   function showAdmin() {
@@ -653,6 +732,7 @@
     renderAll();
   }
   function showLogin(msg) {
+    setMenuOpen(false);
     password = '';
     options = null;
     try { sessionStorage.removeItem('kepAdminPw'); } catch (e) {}
@@ -684,9 +764,24 @@
     if (pw) login(pw, false);
   });
 
+  $('menuBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    setMenuOpen(!isMenuOpen());
+  });
+  document.addEventListener('click', function (e) {
+    if (isMenuOpen() && !e.target.closest('#menuWrap')) setMenuOpen(false);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && isMenuOpen()) { setMenuOpen(false); $('menuBtn').focus(); }
+  });
+
   $('tabs').addEventListener('click', function (e) {
-    const b = e.target.closest('.tab');
+    const b = e.target.closest('.menu-item');
     if (!b) return;
+    if (b.tagName === 'A') { setMenuOpen(false); return; }   // តំណភ្ជាប់ (ផ្ទាំងគ្រប់គ្រង) — ទុកឲ្យ browser បើកដោយខ្លួនឯង
+    setMenuOpen(false);
+    $('pwForm').reset();
+    setMsg($('pwStatus'), '');
     current = b.getAttribute('data-key');
     lastAdded = '';
     resetRowState();
@@ -783,6 +878,33 @@
     } else if (e.key === 'Escape') {
       resetRowState(); renderList();
     }
+  });
+
+
+  // ---------- ប្តូរពាក្យសម្ងាត់ ----------
+  $('pwForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const cur = $('curPw').value;
+    const n1 = $('newPw').value;
+    const n2 = $('newPw2').value;
+    const st = $('pwStatus');
+    if (cur !== password) { setMsg(st, 'ពាក្យសម្ងាត់បច្ចុប្បន្នមិនត្រឹមត្រូវ', 'err'); return; }
+    if (n1.length < 6) { setMsg(st, 'ពាក្យសម្ងាត់ថ្មីត្រូវមានយ៉ាងតិច ៦ តួអក្សរ', 'err'); return; }
+    if (n1 !== n2) { setMsg(st, 'ពាក្យសម្ងាត់ថ្មីទាំងពីរមិនដូចគ្នាទេ', 'err'); return; }
+    if (n1 === cur) { setMsg(st, 'ពាក្យសម្ងាត់ថ្មីត្រូវខុសពីពាក្យសម្ងាត់បច្ចុប្បន្ន', 'err'); return; }
+    const btn = $('pwBtn');
+    btn.disabled = true;
+    setMsg(st, 'កំពុងរក្សាទុក...', '');
+    apiChangePassword(cur, n1).then(function () {
+      password = n1;
+      try { sessionStorage.setItem('kepAdminPw', n1); } catch (err) {}
+      $('pwForm').reset();
+      btn.disabled = false;
+      setMsg(st, '✓ បានប្តូរពាក្យសម្ងាត់រួចរាល់ — សូមប្រើពាក្យសម្ងាត់ថ្មីនៅពេលចូលលើកក្រោយ', 'ok');
+    }).catch(function (err) {
+      btn.disabled = false;
+      setMsg(st, errText(err), 'err');
+    });
   });
 
   $('logoutBtn').addEventListener('click', function () { showLogin(''); });
