@@ -175,3 +175,28 @@ async function adminDeleteItem(password, category, name) {
   clearReportCache_();
   return data;
 }
+
+// ផ្ញើរបាយការណ៍ប្រចាំខែ (PDF) ទៅ Telegram — ប្រើ POST ព្រោះ PDF ធំពេកសម្រាប់ URL
+async function adminSendReportPdf(password, monthYear, pdfBase64, caption) {
+  const response = await fetch(GAS_API_URL, {
+    method: "POST",
+    // text/plain ដើម្បីជៀស CORS preflight (Apps Script មិនឆ្លើយ OPTIONS)
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      action: "adminSendReportPdf",
+      password: password,
+      monthYear: monthYear,
+      pdfBase64: pdfBase64,
+      caption: caption || ""
+    }),
+    cache: "no-store"
+  });
+  if (!response.ok) {
+    throw new Error("API Error: " + response.status + " " + response.statusText);
+  }
+  const result = await response.json();
+  if (result && result.ok === false) {
+    throw new Error(result.error || "API request failed");
+  }
+  return result.data;
+}
