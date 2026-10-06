@@ -742,6 +742,7 @@
   }
 
   function renderAll() {
+    if (options) { try { localStorage.setItem("kepAdminOpts", JSON.stringify(options)); } catch (e) {} }
     renderTabs();
     const isReport = current === 'report';
     const isPw = current === 'password';
@@ -763,6 +764,7 @@
     password = '';
     options = null;
     clearAuth();
+    try { localStorage.removeItem('kepAdminOpts'); } catch (e) {}
     $('adminView').classList.add('hidden');
     $('loginView').classList.remove('hidden');
     $('pwInput').value = '';
@@ -777,6 +779,7 @@
       password = pw;
       options = data;
       saveAuth(pw);
+      try { localStorage.setItem('kepAdminOpts', JSON.stringify(data)); } catch (e) {}
       btn.disabled = false;
       showAdmin();
     }).catch(function (err) {
@@ -1321,7 +1324,27 @@
   // ចូលដោយស្វ័យប្រវត្តិ ប្រសិនបើបានចូលរួចហើយក្នុង tab នេះ
   (function autoLogin() {
     const saved = loadAuth();
-    if (saved) login(saved, true);
+    if (!saved) return;
+    // លាក់ទម្រង់ login ភ្លាម កុំឱ្យភ្លឹបភ្លែត
+    $('loginView').classList.add('hidden');
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem('kepAdminOpts') || 'null'); } catch (e) {}
+    if (cached) {
+      // បង្ហាញភ្លាមពីទិន្នន័យចាស់ រួចធ្វើឱ្យថ្មីនៅផ្ទៃខាងក្រោយ
+      password = saved; options = cached; showAdmin();
+      apiGetOptions(saved).then(function (data) {
+        options = data;
+        try { localStorage.setItem('kepAdminOpts', JSON.stringify(data)); } catch (e) {}
+        if (!$('adminView').classList.contains('hidden')) renderAll();
+      }).catch(function (err) {
+        if (/ពាក្យសម្ងាត់|password|unauthor/i.test(errText(err))) showLogin('');
+      });
+      return;
+    }
+    const ld = document.createElement('p');
+    ld.className = 'card-sub'; ld.id = 'autoLoading'; ld.textContent = 'កំពុងចូល...';
+    $('loginView').parentNode.insertBefore(ld, $('loginView'));
+    login(saved, true).then(function () { ld.remove(); });
   })();
 
   // ធ្វើឲ្យទទឹងអក្សរ "មន្ទីរពេទ្យខេត្តកែប" (ខាងលើ) ស្មើនឹងទទឹងពាក្យ
