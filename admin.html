@@ -335,11 +335,18 @@
   td.idx{ width:1%; white-space:nowrap; color:var(--muted); font-variant-numeric:tabular-nums; }
   tr.just-added td{ animation:flash 2.4s ease-out; }
   @keyframes flash{ from{ background:#c9f1d9; } to{ background:transparent; } }
+  .top-bar{ display:flex; gap:10px; align-items:stretch; margin-bottom:22px; }
+  .top-bar .menu-wrap{ flex:1; min-width:0; margin-bottom:0; }
   .logout{
-    background:none; border:none; color:var(--muted);
-    font-family:inherit; font-size:12.5px; font-weight:600;
-    text-decoration:underline; cursor:pointer; padding:0;
+    display:inline-flex; align-items:center; gap:7px; flex-shrink:0;
+    background:#fff; border:1.5px solid #f2c4c4; color:#c0392b;
+    font-family:inherit; font-size:14px; font-weight:700;
+    border-radius:12px; padding:0 14px; cursor:pointer; transition:background .15s, border-color .15s;
   }
+  .logout svg{ width:19px; height:19px; }
+  .logout:hover{ background:#fdecec; border-color:#e57373; }
+  .logout:active{ transform:scale(.97); }
+  @media (max-width:360px){ .logout span{ display:none; } .logout{ padding:0 12px; } }
   @media (max-width:768px){
     .add-form{ padding:16px 14px 4px; }
   }
@@ -399,13 +406,13 @@
   }
   #reportView .section{ margin-bottom:22px; }
   @media print{ .act-col{ display:none; } }
-  @media print{ .login-box, .menu-wrap, .add-form, #pwView{ display:none; } }
+  @media print{ .login-box, .menu-wrap, .top-bar, .add-form, #pwView{ display:none; } }
 
   /* ===== បោះពុម្ពរបាយការណ៍ពីទំព័រ Admin ===== */
   .rpt-print-head{ display:none; }
   @media print{
     body.rpt-active .card-head,
-    body.rpt-active .menu-wrap,
+    body.rpt-active .menu-wrap, body.rpt-active .top-bar,
     body.rpt-active .send-confirm,
     body.rpt-active .status-msg,
     body.rpt-active .logout,
@@ -464,6 +471,7 @@
 
       <!-- Admin panel -->
       <div id="adminView" class="hidden">
+        <div class="top-bar">
         <div class="menu-wrap" id="menuWrap">
           <button type="button" class="menu-btn" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="tabs">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
@@ -471,6 +479,11 @@
             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="menu-panel hidden" id="tabs" role="menu"></div>
+        </div>
+        <button type="button" class="logout" id="logoutBtn" aria-label="ចាកចេញ" title="ចាកចេញ">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <span>ចាកចេញ</span>
+        </button>
         </div>
 
         <div id="catView">
@@ -566,9 +579,6 @@
           <div id="rBody"></div>
         </div>
 
-        <div style="text-align:center; margin-top:18px;">
-          <button type="button" class="logout" id="logoutBtn">ចាកចេញ</button>
-        </div>
       </div>
 
       <div class="status-msg" id="loginMsg"></div>
