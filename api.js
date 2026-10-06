@@ -123,3 +123,31 @@ async function getDashboardData() {
   writeCache_(key, data);
   return data;
 }
+
+// ============================================================
+// Admin — បន្ថែមរថយន្ត / អ្នកបើកបរ / មន្ត្រី / ទិសដៅ (មិន cache)
+// ============================================================
+
+function clearFormOptionsCache_() {
+  try {
+    localStorage.removeItem(cacheKey_("getFormOptions", {}));
+  } catch (e) {
+    // ignore
+  }
+}
+
+async function adminGetOptions(password) {
+  return apiRequest("adminGetOptions", { password: password });
+}
+
+async function adminAddItem(password, category, name, phone) {
+  const data = await apiRequest("adminAddItem", {
+    password: password,
+    category: category,
+    name: name,
+    phone: phone || ""
+  });
+  // ធាតុថ្មីត្រូវបង្ហាញក្នុងទម្រង់ស្នើសុំភ្លាមៗ
+  clearFormOptionsCache_();
+  return data;
+}
