@@ -101,7 +101,7 @@
   }
   .card-head{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px; margin-bottom:6px; }
   .card-head .emoji{ font-size:28px; line-height:1; }
-  .card-head h2{ margin:0; font-size:20px; font-weight:400; color:var(--red-600); letter-spacing:.2px; font-family:'Khmer OS Muol Light','Moul',sans-serif; }
+  .card-head h2{ margin:0; font-size:20px; font-weight:400; color:var(--red-600); letter-spacing:.2px; font-family:'Khmer OS Muol Light','Moul',sans-serif;  white-space:nowrap; }
   .card-head h2 strong{ font-weight:800; }
   .card-head .report-subtitle{ font-size:16px; font-weight:700; color:var(--blue-900); }
   .card-sub{ margin:6px 0 24px; font-size:13.5px; color:var(--muted); font-weight:500; text-align:center; }
@@ -502,12 +502,32 @@
     document.getElementById('dashboardBody').innerHTML = html;
   }
 
+
+  // បង្រួមទំហំអក្សរចំណងជើងឲ្យនៅ ១ ជួរ (ឈ្មោះខែខ្លះវែង ដូចជា "វិច្ឆិកា" ធ្វើឲ្យបាក់ជួរលើទូរស័ព្ទ)
+  function fitTitleOneLine() {
+    const h = document.getElementById('dashTitleMonth');
+    if (!h) return;
+    const wrap = h.parentElement;
+    h.style.fontSize = '';
+    const maxW = wrap.clientWidth;
+    let size = parseFloat(getComputedStyle(h).fontSize);
+    let guard = 0;
+    while (h.getBoundingClientRect().width > maxW && size > 9 && guard++ < 60) {
+      size -= 0.5;
+      h.style.fontSize = size + 'px';
+    }
+  }
+  window.addEventListener('resize', fitTitleOneLine);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitTitleOneLine);
+  window.addEventListener('load', fitTitleOneLine);
+
   function updateDashboardTitle(monthYear) {
     const parts = monthYear.split('-');
     const y = parts[0];
     const m = parseInt(parts[1], 10);
     document.getElementById('dashMonthNum').textContent = KHMER_MONTHS[m - 1] || m;
     document.getElementById('dashYearNum').textContent = y;
+    fitTitleOneLine();
   }
 
   const KHMER_MONTHS = [
