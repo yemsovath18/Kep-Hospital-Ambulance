@@ -222,3 +222,27 @@ async function adminChangePassword(password, newPassword) {
   }
   return result.data;
 }
+
+// ============================================================
+// Admin — ទិន្នន័យបញ្ជូន (មើល / កែ / លុប) — មិន cache
+// ============================================================
+async function adminListDispatches(password) {
+  return apiRequest("adminListDispatches", { password: password });
+}
+
+async function adminUpdateDispatch(password, row, ts, d) {
+  const data = await apiRequest("adminUpdateDispatch", {
+    password: password, row: row, ts: ts,
+    vehicle: d.vehicle || "", destination: d.destination || "", driver: d.driver || "",
+    officer1: d.officer1 || "", officer2: d.officer2 || "", officer3: d.officer3 || "",
+    notes: d.notes || ""
+  });
+  clearReportCache_();
+  return data;
+}
+
+async function adminDeleteDispatch(password, row, ts) {
+  const data = await apiRequest("adminDeleteDispatch", { password: password, row: row, ts: ts });
+  clearReportCache_();
+  return data;
+}
