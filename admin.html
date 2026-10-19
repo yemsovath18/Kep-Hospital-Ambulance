@@ -312,6 +312,9 @@
   .menu-item:hover{ background:var(--field-bg); }
   .menu-item.active{ background:var(--blue-100); color:var(--blue-900); font-weight:800; }
   .menu-item .cnt{ font-weight:700; color:var(--muted); font-size:13px; }
+  .menu-item .mi-l{ display:flex; align-items:center; gap:12px; min-width:0; }
+  .menu-item .mi{ width:20px; height:20px; flex-shrink:0; color:var(--blue-500); }
+  .menu-item.active .mi{ color:var(--blue-900); }
   .menu-sep{ height:1px; background:var(--border); margin:4px 8px; }
   a.menu-item{ text-decoration:none; }
   .menu-item .ext{ width:15px; height:15px; color:var(--muted); flex-shrink:0; }
@@ -406,6 +409,29 @@
   }
   #reportView .section{ margin-bottom:22px; }
   @media print{ .act-col{ display:none; } }
+
+  /* ទិន្នន័យបញ្ជូន */
+  .disp-card{ background:#fff; border:1.5px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:10px; }
+  .disp-card.editing{ background:var(--field-bg); border-color:var(--blue-500); }
+  .disp-card.confirming{ border-color:#e57373; background:#fff8f8; }
+  .disp-top{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .disp-no{ font-weight:800; color:var(--blue-900); font-size:13px; background:var(--blue-100); border-radius:8px; padding:2px 8px; }
+  .disp-time{ flex:1; min-width:0; color:var(--muted); font-size:13px; font-variant-numeric:tabular-nums; }
+  .disp-main{ font-weight:800; color:var(--blue-900); font-size:15px; margin-bottom:6px; word-break:break-word; }
+  .disp-arrow{ color:var(--blue-500); margin:0 8px; }
+  .disp-meta{ margin:0; display:grid; grid-template-columns:auto 1fr; gap:3px 12px; font-size:13.5px; }
+  .disp-meta dt{ color:var(--muted); }
+  .disp-meta dd{ margin:0; word-break:break-word; }
+  .disp-form{ display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; }
+  .disp-form .field{ margin:0; }
+  .disp-form .field:last-child{ grid-column:1 / -1; }
+  .disp-form label{ font-size:12.5px; }
+  .disp-acts{ justify-content:flex-start; margin-top:10px; }
+  .disp-confirm{ margin-top:10px; padding-top:10px; border-top:1px dashed #e8b4b4; }
+  .more-btn{ width:100%; padding:12px; border:1.5px dashed var(--blue-500); background:none; color:var(--blue-900); font-family:inherit; font-weight:700; font-size:14px; border-radius:12px; cursor:pointer; }
+  .more-btn:hover{ background:var(--blue-100); }
+  @media (max-width:600px){ .disp-form{ grid-template-columns:1fr; } }
+  @media print{ #dispatchView{ display:none; } }
   @media print{ .login-box, .menu-wrap, .top-bar, .add-form, #pwView{ display:none; } }
 
   /* ===== បោះពុម្ពរបាយការណ៍ពីទំព័រ Admin ===== */
@@ -540,6 +566,15 @@
           <div class="status-msg" id="pwStatus"></div>
         </div>
 
+        <div id="dispatchView" class="hidden">
+          <div class="list-head">
+            <h3>ទិន្នន័យបញ្ជូន</h3>
+            <span class="total" id="dispTotal"></span>
+          </div>
+          <div class="status-msg" id="dispStatus"></div>
+          <div id="dispList"></div>
+        </div>
+
         <div id="reportView" class="hidden">
           <div class="rpt-print-head">
             <h2>របាយការណ៍ប្រចាំខែ <span id="rptMonthName">–</span> ឆ្នាំ <strong id="rptYearNum">–</strong></h2>
@@ -596,6 +631,10 @@
   function apiUpdateItem(pw, category, oldName, name, phone) { return adminUpdateItem(pw, category, oldName, name, phone); }
   function apiDeleteItem(pw, category, name) { return adminDeleteItem(pw, category, name); }
 
+  function apiListDispatches(pw) { return adminListDispatches(pw); }
+  function apiUpdateDispatch(pw, row, ts, d) { return adminUpdateDispatch(pw, row, ts, d); }
+  function apiDeleteDispatch(pw, row, ts) { return adminDeleteDispatch(pw, row, ts); }
+
   function apiGetReport(monthYear) { return getReportData(monthYear); }
   function apiSendReportPdf(pw, monthYear, pdfBase64, caption) { return adminSendReportPdf(pw, monthYear, pdfBase64, caption); }
   function apiChangePassword(pw, newPw) { return adminChangePassword(pw, newPw); }
@@ -611,7 +650,7 @@
 
   let password = '';
   let options = null;       // { vehicles:[], drivers:[{name,phone}], staff:[], destinations:[] }
-  let current = 'vehicles';
+  let current = 'dispatch';
   let lastAdded = '';
 
   // ---------- រក្សាសម្គាល់ចូល (Admin) ----------
@@ -659,19 +698,32 @@
   }
 
   const EXT_ICON = '<svg class="ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
-  const VIEW_LABELS = { report: 'របាយការណ៍ប្រចាំខែ', password: 'ប្តូរពាក្យសម្ងាត់' };
+  const VIEW_LABELS = { dispatch: 'ទិន្នន័យបញ្ជូន', report: 'របាយការណ៍ប្រចាំខែ', password: 'ប្តូរពាក្យសម្ងាត់' };
 
+  const MI = function (p) { return '<svg class="mi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>'; };
+  const MENU_ICONS = {
+    dispatch: MI('<line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>'),
+    vehicles: MI('<path d="M3 16V8a1 1 0 0 1 1-1h9v9"/><path d="M13 10h4l3 3v3h-7"/><circle cx="7.5" cy="17.5" r="1.8"/><circle cx="16.5" cy="17.5" r="1.8"/><path d="M8 9.5v3M6.5 11h3"/>'),
+    drivers: MI('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.2"/><path d="M12 14.2V21M9.8 11.2L3.4 9.6M14.2 11.2l6.4-1.6"/>'),
+    staff: MI('<path d="M17 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>'),
+    destinations: MI('<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>'),
+    report: MI('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/>'),
+    dashboard: MI('<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>'),
+    password: MI('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>')
+  };
   function renderTabs() {
     function item(key, label) {
-      return '<button type="button" role="menuitem" class="menu-item' + (current === key ? ' active' : '') + '" data-key="' + key + '"><span>' + label + '</span></button>';
+      return '<button type="button" role="menuitem" class="menu-item' + (current === key ? ' active' : '') + '" data-key="' + key + '"><span class="mi-l">' + MENU_ICONS[key] + '<span>' + label + '</span></span></button>';
     }
-    $('tabs').innerHTML = CATEGORIES.map(function (c) {
+    $('tabs').innerHTML = item('dispatch', VIEW_LABELS.dispatch) +
+      '<div class="menu-sep"></div>' +
+      CATEGORIES.map(function (c) {
       return '<button type="button" role="menuitem" class="menu-item' + (c.key === current ? ' active' : '') + '" data-key="' + c.key + '">' +
-        '<span>' + escapeHtml(c.tab) + '</span><span class="cnt">' + getItems(c.key).length + '</span></button>';
+        '<span class="mi-l">' + MENU_ICONS[c.key] + '<span>' + escapeHtml(c.tab) + '</span></span><span class="cnt">' + getItems(c.key).length + '</span></button>';
     }).join('') +
       '<div class="menu-sep"></div>' +
       item('report', VIEW_LABELS.report) +
-      '<a role="menuitem" class="menu-item" href="' + DASHBOARD_URL + '"' + (DASHBOARD_NEW_TAB ? ' target="_blank" rel="noopener"' : '') + '><span>ផ្ទាំងគ្រប់គ្រង</span>' + (DASHBOARD_NEW_TAB ? EXT_ICON : '') + '</a>' +
+      '<a role="menuitem" class="menu-item" href="' + DASHBOARD_URL + '"' + (DASHBOARD_NEW_TAB ? ' target="_blank" rel="noopener"' : '') + '><span class="mi-l">' + MENU_ICONS.dashboard + '<span>ផ្ទាំងគ្រប់គ្រង</span></span>' + (DASHBOARD_NEW_TAB ? EXT_ICON : '') + '</a>' +
       '<div class="menu-sep"></div>' +
       item('password', VIEW_LABELS.password);
     const cur = CATEGORIES.find(function (c) { return c.key === current; });
@@ -756,11 +808,13 @@
     renderTabs();
     const isReport = current === 'report';
     const isPw = current === 'password';
-    $('catView').classList.toggle('hidden', isReport || isPw);
+    const isDisp = current === 'dispatch';
+    $('dispatchView').classList.toggle('hidden', !isDisp);
+    $('catView').classList.toggle('hidden', isReport || isPw || isDisp);
     $('reportView').classList.toggle('hidden', !isReport);
     $('pwView').classList.toggle('hidden', !isPw);
     document.body.classList.toggle('rpt-active', isReport);
-    if (!isReport && !isPw) { renderForm(); renderList(); }
+    if (!isReport && !isPw && !isDisp) { renderForm(); renderList(); }
   }
 
   function showAdmin() {
@@ -768,11 +822,12 @@
     $('adminView').classList.remove('hidden');
     setMsg($('loginMsg'), '');
     renderAll();
+    if (current === 'dispatch') loadDispatches();
   }
   function showLogin(msg) {
     setMenuOpen(false);
     password = '';
-    options = null;
+    options = null; dispatches = null;
     clearAuth();
     try { localStorage.removeItem('kepAdminOpts'); } catch (e) {}
     $('adminView').classList.add('hidden');
@@ -828,6 +883,7 @@
     setMsg($('statusMsg'), '');
     renderAll();
     if (current === 'report') { initReportView(); loadAdminReport(); }
+    if (current === 'dispatch') { dispEditRow = -1; dispDelRow = -1; dispShown = DISP_PAGE; loadDispatches(); }
   });
 
   $('addForm').addEventListener('submit', function (e) {
@@ -945,6 +1001,155 @@
       btn.disabled = false;
       setMsg(st, errText(err), 'err');
     });
+  });
+
+
+  // ============================================================
+  // ទិន្នន័យបញ្ជូន — មើល / កែ / លុប (ថ្មីបំផុតនៅលើគេ)
+  // ============================================================
+  const DISP_PAGE = 30;
+  let dispatches = null;     // [{row, ts, tsText, vehicle, destination, officer1..3, driver, notes}]
+  let dispShown = DISP_PAGE;
+  let dispEditRow = -1;      // row (sheet) being edited
+  let dispDelRow = -1;       // row awaiting delete confirmation
+  let dispBusy = false;
+  let dispReqId = 0;
+
+  function attr(s) { return escapeHtml(s).replace(/"/g, '&quot;'); }
+
+  function loadDispatches(keepMsg) {
+    const myId = ++dispReqId;
+    if (!dispatches) {
+      $('dispList').innerHTML = '';
+      setMsg($('dispStatus'), 'កំពុងផ្ទុក...', '');
+    }
+    return apiListDispatches(password).then(function (d) {
+      if (myId !== dispReqId) return;
+      dispatches = (d && d.records) || [];
+      setMsg($('dispStatus'), keepMsg || '', keepMsg ? 'err' : '');
+      renderDispatches();
+    }).catch(function (err) {
+      if (myId !== dispReqId) return;
+      setMsg($('dispStatus'), errText(err), 'err');
+    });
+  }
+
+  function dispSelect(id, list, value, allowBlank) {
+    const names = list.map(function (it) { return it.name; });
+    if (value && names.indexOf(value) === -1) names.unshift(value); // រក្សាតម្លៃចាស់ទោះលែងមានក្នុងបញ្ជី
+    let h = '<select class="inline-input" id="' + id + '">';
+    if (allowBlank) h += '<option value="">— គ្មាន —</option>';
+    names.forEach(function (n) {
+      h += '<option value="' + attr(n) + '"' + (n === value ? ' selected' : '') + '>' + escapeHtml(n) + '</option>';
+    });
+    return h + '</select>';
+  }
+
+  function dispField(label, inner) {
+    return '<div class="field"><label>' + label + '</label>' + inner + '</div>';
+  }
+
+  function renderDispatches() {
+    const box = $('dispList');
+    if (!dispatches) { box.innerHTML = ''; return; }
+    $('dispTotal').textContent = 'សរុប ' + dispatches.length;
+    if (!dispatches.length) { box.innerHTML = '<p class="empty-note">មិនទាន់មានទិន្នន័យបញ្ជូនទេ</p>'; return; }
+    const list = dispatches.slice(0, dispShown);
+    let html = '';
+    list.forEach(function (r, k) {
+      const no = dispatches.length - k;   // លេខធំបំផុត = ថ្មីបំផុត
+      if (r.row === dispEditRow) {
+        html += '<div class="disp-card editing" data-k="' + k + '">' +
+          '<div class="disp-top"><span class="disp-no">#' + no + '</span><span class="disp-time">' + escapeHtml(r.tsText) + '</span></div>' +
+          '<div class="disp-form">' +
+          dispField('រថយន្ត', dispSelect('dVeh', getItems('vehicles'), r.vehicle, false)) +
+          dispField('ទិសដៅ', dispSelect('dDest', getItems('destinations'), r.destination, false)) +
+          dispField('មន្ត្រី/បុគ្គលិក ១', dispSelect('dO1', getItems('staff'), r.officer1, false)) +
+          dispField('មន្ត្រី/បុគ្គលិក ២', dispSelect('dO2', getItems('staff'), r.officer2, true)) +
+          dispField('មន្ត្រី/បុគ្គលិក ៣', dispSelect('dO3', getItems('staff'), r.officer3, true)) +
+          dispField('អ្នកបើកបរ', dispSelect('dDrv', getItems('drivers'), r.driver, false)) +
+          dispField('កំណត់ត្រាផ្សេងៗ', '<input type="text" class="inline-input" id="dNote" maxlength="500" value="' + attr(r.notes) + '">') +
+          '</div><div class="act-group disp-acts">' +
+          '<button type="button" class="mini-btn save" data-act="dsave" data-k="' + k + '">រក្សាទុក</button>' +
+          '<button type="button" class="mini-btn" data-act="dcancel">បោះបង់</button></div></div>';
+        return;
+      }
+      const staff = [r.officer1, r.officer2, r.officer3].filter(Boolean).join('، ');
+      html += '<div class="disp-card' + (r.row === dispDelRow ? ' confirming' : '') + '" data-k="' + k + '">' +
+        '<div class="disp-top"><span class="disp-no">#' + no + '</span><span class="disp-time">' + escapeHtml(r.tsText) + '</span>' +
+        '<div class="act-group">' +
+        '<button type="button" class="icon-btn" data-act="dedit" data-k="' + k + '" title="កែ" aria-label="កែ">' + ICON_EDIT + '</button>' +
+        '<button type="button" class="icon-btn del" data-act="ddel" data-k="' + k + '" title="លុប" aria-label="លុប">' + ICON_DEL + '</button></div></div>' +
+        '<div class="disp-main">' + escapeHtml(r.vehicle || '—') + '<span class="disp-arrow">→</span>' + escapeHtml(r.destination || '—') + '</div>' +
+        '<dl class="disp-meta">' +
+        '<dt>អ្នកបើកបរ</dt><dd>' + escapeHtml(r.driver || '—') + '</dd>' +
+        '<dt>មន្ត្រី/បុគ្គលិក</dt><dd>' + escapeHtml(staff || '—') + '</dd>' +
+        (r.notes ? '<dt>កំណត់ត្រា</dt><dd>' + escapeHtml(r.notes) + '</dd>' : '') +
+        '</dl>';
+      if (r.row === dispDelRow) {
+        html += '<div class="disp-confirm"><strong>លុបកំណត់ត្រានេះ?</strong>' +
+          '<div class="warn-note">កំណត់ត្រានឹងត្រូវលុបចេញពីសន្លឹក ហើយលេខក្នុងរបាយការណ៍ និង dashboard នឹងថយចុះ។</div>' +
+          '<div class="act-group disp-acts">' +
+          '<button type="button" class="mini-btn danger" data-act="dconfirm" data-k="' + k + '">លុប</button>' +
+          '<button type="button" class="mini-btn" data-act="dcancel">បោះបង់</button></div></div>';
+      }
+      html += '</div>';
+    });
+    if (dispatches.length > dispShown) {
+      html += '<button type="button" class="more-btn" data-act="dmore">បង្ហាញបន្ថែម (' + (dispatches.length - dispShown) + ')</button>';
+    }
+    box.innerHTML = html;
+  }
+
+  $('dispList').addEventListener('click', function (e) {
+    const b = e.target.closest('[data-act]');
+    if (!b || dispBusy) return;
+    const act = b.getAttribute('data-act');
+    const k = Number(b.getAttribute('data-k'));
+    const rec = dispatches && dispatches[k];
+    setMsg($('dispStatus'), '');
+    if (act === 'dmore') { dispShown += DISP_PAGE; renderDispatches(); return; }
+    if (act === 'dcancel') { dispEditRow = -1; dispDelRow = -1; renderDispatches(); return; }
+    if (act === 'dedit') { dispEditRow = rec.row; dispDelRow = -1; renderDispatches(); return; }
+    if (act === 'ddel') { dispDelRow = rec.row; dispEditRow = -1; renderDispatches(); return; }
+
+    function afterError(err) {
+      dispBusy = false;
+      setMsg($('dispStatus'), errText(err), 'err');
+      renderDispatches();
+      if (/ផ្ទុកបញ្ជីឡើងវិញ|រកមិនឃើញ/.test(errText(err))) {
+        dispEditRow = -1; dispDelRow = -1; loadDispatches(errText(err));
+      }
+    }
+    if (act === 'dsave') {
+      const d = {
+        vehicle: $('dVeh').value, destination: $('dDest').value, officer1: $('dO1').value,
+        officer2: $('dO2').value, officer3: $('dO3').value, driver: $('dDrv').value, notes: $('dNote').value.trim()
+      };
+      if (!d.vehicle || !d.destination || !d.officer1 || !d.driver) {
+        setMsg($('dispStatus'), 'សូមជ្រើសរើសរថយន្ត ទិសដៅ មន្ត្រី ១ និងអ្នកបើកបរ', 'err');
+        return;
+      }
+      dispBusy = true; b.disabled = true;
+      setMsg($('dispStatus'), 'កំពុងរក្សាទុក...', '');
+      apiUpdateDispatch(password, rec.row, rec.ts, d).then(function (res) {
+        dispBusy = false; dispEditRow = -1;
+        dispatches = (res && res.records) || [];
+        renderDispatches();
+        setMsg($('dispStatus'), 'បានរក្សាទុករួចរាល់', 'ok');
+      }).catch(afterError);
+      return;
+    }
+    if (act === 'dconfirm') {
+      dispBusy = true; b.disabled = true;
+      setMsg($('dispStatus'), 'កំពុងលុប...', '');
+      apiDeleteDispatch(password, rec.row, rec.ts).then(function (res) {
+        dispBusy = false; dispDelRow = -1;
+        dispatches = (res && res.records) || [];
+        renderDispatches();
+        setMsg($('dispStatus'), 'បានលុបរួចរាល់', 'ok');
+      }).catch(afterError);
+    }
   });
 
   $('logoutBtn').addEventListener('click', function () { showLogin(''); });
